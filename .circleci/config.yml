@@ -1,16 +1,19 @@
-version: 2.1
-
+version: 2
 jobs:
-  build-project:
+  build:
+    working_directory: /var/www/html
     docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+      - image: php:7.1-apache
+        environment:
+          APP_ENV: test
     steps:
-      - checkout
+      - run:
+          name: Install system packages
+          command: apt-get update && apt-get -y install git
       - run:
           name: Install PHP extensions
           command: docker-php-ext-install pdo
+      - checkout
       - run:
           name: Install Composer
           command: |
@@ -26,5 +29,10 @@ jobs:
       - run:
           name: Install project dependencies
           command: php composer.phar install
-
+      - run:
+          name: Run CS tests
+          command: vendor/bin/phpcs
+      - run:
+          name: Run Unit tests
+          command: vendor/bin/phpunit
 
